@@ -11,8 +11,8 @@ import (
 )
 
 type JWT interface {
-	GenerateJWTForStudent(email string) (string, error)
-	GenerateRefreshToken(email string) (string, error)
+	GenerateJWTForStudent(studentID string) (string, error)
+	GenerateRefreshToken(studentID string) (string, error)
 }
 
 type TokenData map[string]string
@@ -37,13 +37,13 @@ func (*tokenGenerator) getJWTSeed() []byte {
 	return []byte(os.Getenv("JWT_TOKEN_SEED"))
 }
 
-func (t *tokenGenerator) GenerateJWTForStudent(email string) (string, error) {
-	return t.GenerateJWTForStudentAndDuration(email, TokenData{"email": email}, time.Hour)
+func (t *tokenGenerator) GenerateJWTForStudent(studentID string) (string, error) {
+	return t.GenerateJWTForStudentAndDuration(studentID, TokenData{"student_id": studentID}, time.Hour)
 }
 
-func (t *tokenGenerator) GenerateRefreshToken(email string) (string, error) {
+func (t *tokenGenerator) GenerateRefreshToken(studentID string) (string, error) {
 	const threeMonthsInHours = 2190 * time.Hour
-	return t.GenerateJWTForStudentAndDuration(email, TokenData{"email": email}, threeMonthsInHours)
+	return t.GenerateJWTForStudentAndDuration(studentID, TokenData{"student_id": studentID}, threeMonthsInHours)
 }
 
 func (t *tokenGenerator) GenerateJWTForStudentAndDuration(audience string, data TokenData, duration time.Duration) (string, error) {

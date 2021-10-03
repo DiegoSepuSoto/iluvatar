@@ -15,12 +15,12 @@ func (u *authUseCase) Login(email, password string) (*models.Student, error) {
 
 	student.Career = studentCareer
 
-	err = u.studentRepository.UpsertStudent(student)
+	studentID, err := u.studentRepository.UpsertStudent(student)
 	if err != nil {
 		return nil, err
 	}
 
-	userToken, refreshToken, err := u.getUserTokens(student.Email)
+	userToken, refreshToken, err := u.getUserTokens(studentID)
 	if err != nil {
 		return nil, err
 	}
@@ -31,13 +31,13 @@ func (u *authUseCase) Login(email, password string) (*models.Student, error) {
 	return student, nil
 }
 
-func (u *authUseCase) getUserTokens(email string) (string, string, error) {
-	userToken, err := u.tokenRepository.GenerateJWTForStudent(email)
+func (u *authUseCase) getUserTokens(studentID string) (string, string, error) {
+	userToken, err := u.tokenRepository.GenerateJWTForStudent(studentID)
 	if err != nil {
 		return "", "", err
 	}
 
-	refreshToken, err := u.tokenRepository.GenerateRefreshToken(email)
+	refreshToken, err := u.tokenRepository.GenerateRefreshToken(studentID)
 	if err != nil {
 		return "", "", err
 	}

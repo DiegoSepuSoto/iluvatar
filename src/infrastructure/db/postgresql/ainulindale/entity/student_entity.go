@@ -1,7 +1,7 @@
 package entity
 
 type StudentEntity struct {
-	ID     int `gorm:"primaryKey"`
+	ID     string `gorm:"primaryKey"`
 	Email  string
 	Career string
 }
