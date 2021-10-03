@@ -1,12 +1,11 @@
 package ainulindale
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"crypto/md5"
+	"fmt"
 	"iluvatar/src/domain/models"
 	"iluvatar/src/infrastructure/db/postgresql/ainulindale/entity"
 )
-
-const encryptionCost = 14
 
 func (r *ainulindalePostgresqlRepository) UpsertStudent(student *models.Student) error {
 	encryptedEmail, err := generateEncryptedUserName(student.Email)
@@ -20,23 +19,25 @@ func (r *ainulindalePostgresqlRepository) UpsertStudent(student *models.Student)
 		Career: student.Career,
 	}
 
-	dbResponse := db.Model(studentEntity).Where("email = ?", encryptedEmail).Updates(&studentEntity)
+	var queryStudent entity.StudentEntity
 
-	if dbResponse.RowsAffected == 0 {
-		db.Create(studentEntity)
+	query := db.Where("email = ?", encryptedEmail).Limit(1).Find(&queryStudent)
+	if query.Error != nil {
+		return query.Error
 	}
 
-	if dbResponse.Error != nil {
-		return dbResponse.Error
+	if query.RowsAffected == 0 {
+		dbResponse := db.Create(studentEntity)
+
+		if dbResponse.Error != nil {
+			return dbResponse.Error
+		}
 	}
 
 	return nil
 }
 
 func generateEncryptedUserName(studentEmail string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(studentEmail), encryptionCost)
-	if err != nil {
-		return "", err
-	}
-	return string(bytes), nil
+	encryption := md5.Sum([]byte(studentEmail))
+	return fmt.Sprintf("%x", encryption), nil
 }
