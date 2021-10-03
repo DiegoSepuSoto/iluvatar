@@ -20,5 +20,27 @@ func (u *authUseCase) Login(email, password string) (*models.Student, error) {
 		return nil, err
 	}
 
+	userToken, refreshToken, err := u.getUserTokens(student.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	student.Token = userToken
+	student.RefreshToken = refreshToken
+
 	return student, nil
+}
+
+func (u *authUseCase) getUserTokens(email string) (string, string, error) {
+	userToken, err := u.tokenRepository.GenerateJWTForStudent(email)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err := u.tokenRepository.GenerateRefreshToken()
+	if err != nil {
+		return "", "", err
+	}
+
+	return userToken, refreshToken, nil
 }

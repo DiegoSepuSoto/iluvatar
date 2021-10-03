@@ -16,6 +16,7 @@ import (
 	authHandler "iluvatar/src/infrastructure/http/handlers/rest/v1/auth"
 	authRepository "iluvatar/src/infrastructure/http/repository/miutem/auth"
 	"iluvatar/src/infrastructure/http/repository/miutem/career"
+	"iluvatar/src/shared/utils/jwt"
 	"iluvatar/src/shared/validations"
 	"net/http"
 	"os"
@@ -39,11 +40,12 @@ func main() {
 
 	initDBMigrations(dbConnection)
 
+	tokenGenerator := jwt.Token()
 	ainulindaleRepository := ainulindale.NewAinulindalePostgresqlSQLRepository(postgresqlConnection)
 	miUTEMAPIHTTPClient := client.NewHTTPClientCall(os.Getenv("MI_UTEM_API_HOST"), &http.Client{})
 	authRepositoryImpl := authRepository.NewLoginMiUTEMRepository(miUTEMAPIHTTPClient)
 	careerRepository := career.NewCareerMiUTEMRepository(miUTEMAPIHTTPClient)
-	authUseCaseImpl := authUseCase.NewAuthUseCase(authRepositoryImpl, careerRepository, ainulindaleRepository)
+	authUseCaseImpl := authUseCase.NewAuthUseCase(authRepositoryImpl, careerRepository, ainulindaleRepository, tokenGenerator)
 	_ = authHandler.NewAuthHandler(e, authUseCaseImpl)
 
 	quit := make(chan os.Signal, 1)
