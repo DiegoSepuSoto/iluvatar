@@ -1,10 +1,12 @@
 package auth
 
 import (
+	"fmt"
 	"github.com/labstack/echo"
 	"iluvatar/src/application/usecase"
 	"iluvatar/src/domain/models/requests"
 	"iluvatar/src/infrastructure/http/handlers/rest/middleware"
+	"iluvatar/src/shared/utils/jwt"
 	"net/http"
 )
 
@@ -22,6 +24,7 @@ func NewAuthHandler(e *echo.Echo, authUseCase usecase.AuthUseCase) *authHandler 
 	authGroupWithAuthentication := e.Group(basePath)
 	authGroupWithAuthentication.Use(middleware.ValidateToken())
 	authGroupWithAuthentication.POST("/validate-token", h.validateToken)
+	authGroupWithAuthentication.POST("/refresh-token", h.refreshToken)
 
 	authGroupWithoutAuthentication := e.Group(basePath)
 	authGroupWithoutAuthentication.POST("/login", h.login)
@@ -31,6 +34,20 @@ func NewAuthHandler(e *echo.Echo, authUseCase usecase.AuthUseCase) *authHandler 
 
 func (h *authHandler) validateToken(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{"message": "valid token", "valid": true})
+}
+
+func (h *authHandler) refreshToken(c echo.Context) error {
+	token := c.Request().Header.Get(echo.HeaderAuthorization)
+	studentID, err := jwt.Token().GetDataFromToken(token, "student_id")
+	if err != nil {
+		return c.JSON(http.StatusBadGateway, echo.Map{"message": fmt.Sprintf("there was an error getting token information [%s]", err.Error())})
+	}
+	newToken, err := h.authUseCase.RefreshToken(studentID)
+	if err != nil {
+		return c.JSON(http.StatusBadGateway, echo.Map{"message": fmt.Sprintf("there was an error creating the new token [%s]", err.Error())})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"token": newToken})
 }
 
 func (h *authHandler) login(c echo.Context) error {
