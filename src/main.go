@@ -6,8 +6,14 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/labstack/gommon/log"
+	client "github.com/pzentenoe/httpclient-call-go"
+	authUseCase "iluvatar/src/application/usecase/auth"
 	"iluvatar/src/infrastructure/http/handlers/rest/health"
+	authHandler "iluvatar/src/infrastructure/http/handlers/rest/v1/auth"
+	authRepository "iluvatar/src/infrastructure/http/repository/miutem/auth"
+	"iluvatar/src/infrastructure/http/repository/miutem/career"
 	"iluvatar/src/shared/validations"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,6 +28,12 @@ func main() {
 	e.Use(middleware.Recover())
 
 	health.NewHealthHandler(e)
+
+	miUTEMAPIHTTPClient := client.NewHTTPClientCall(os.Getenv("MI_UTEM_API_HOST"), &http.Client{})
+	authRepositoryImpl := authRepository.NewLoginMiUTEMRepository(miUTEMAPIHTTPClient)
+	careerRepository := career.NewCareerMiUTEMRepository(miUTEMAPIHTTPClient)
+	authUseCaseImpl := authUseCase.NewAuthUseCase(authRepositoryImpl, careerRepository)
+	_ = authHandler.NewAuthHandler(e, authUseCaseImpl)
 
 	quit := make(chan os.Signal, 1)
 	go startServer(e, quit)
