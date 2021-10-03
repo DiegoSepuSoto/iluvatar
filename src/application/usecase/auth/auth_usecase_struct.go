@@ -5,6 +5,7 @@ import "iluvatar/src/domain/repository"
 type authUseCase struct {
 	authRepository repository.AuthRepository
 	careerRepository repository.CareerRepository
+	studentRepository repository.StudentRepository
 }
 
 func NewAuthUseCase(repositories  ...interface{}) *authUseCase {
@@ -15,6 +16,8 @@ func NewAuthUseCase(repositories  ...interface{}) *authUseCase {
 				u.authRepository = t
 			case repository.CareerRepository:
 				u.careerRepository = t
+			case repository.StudentRepository:
+				u.studentRepository = t
 		}
 	}
 	return u

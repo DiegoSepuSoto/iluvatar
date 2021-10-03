@@ -15,5 +15,10 @@ func (u *authUseCase) Login(email, password string) (*models.Student, error) {
 
 	student.Career = studentCareer
 
+	err = u.studentRepository.UpsertStudent(student)
+	if err != nil {
+		return nil, err
+	}
+
 	return student, nil
 }
