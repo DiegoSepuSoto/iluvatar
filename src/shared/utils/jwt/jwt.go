@@ -12,7 +12,7 @@ import (
 
 type JWT interface {
 	GenerateJWTForStudent(email string) (string, error)
-	GenerateRefreshToken() (string, error)
+	GenerateRefreshToken(email string) (string, error)
 }
 
 type TokenData map[string]string
@@ -41,21 +41,9 @@ func (t *tokenGenerator) GenerateJWTForStudent(email string) (string, error) {
 	return t.GenerateJWTForStudentAndDuration(email, TokenData{"email": email}, time.Hour)
 }
 
-func (t tokenGenerator) GenerateRefreshToken() (string, error) {
+func (t *tokenGenerator) GenerateRefreshToken(email string) (string, error) {
 	const threeMonthsInHours = 2190 * time.Hour
-	now := time.Now()
-	StandardClaims := jwt.StandardClaims{
-		Issuer:    "ILUVATAR_API",
-		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: now.Add(threeMonthsInHours).Unix(),
-	}
-	customClaims := CustomClaims{
-		StandardClaims: StandardClaims,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, customClaims)
-	seed := t.getJWTSeed()
-	return token.SignedString(seed)
+	return t.GenerateJWTForStudentAndDuration(email, TokenData{"email": email}, threeMonthsInHours)
 }
 
 func (t *tokenGenerator) GenerateJWTForStudentAndDuration(audience string, data TokenData, duration time.Duration) (string, error) {

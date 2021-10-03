@@ -37,7 +37,7 @@ func (u *authUseCase) getUserTokens(email string) (string, string, error) {
 		return "", "", err
 	}
 
-	refreshToken, err := u.tokenRepository.GenerateRefreshToken()
+	refreshToken, err := u.tokenRepository.GenerateRefreshToken(email)
 	if err != nil {
 		return "", "", err
 	}
