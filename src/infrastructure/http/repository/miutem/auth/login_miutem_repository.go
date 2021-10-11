@@ -8,11 +8,23 @@ import (
 	"iluvatar/src/domain/models"
 	"iluvatar/src/infrastructure/http/repository/miutem/auth/entity"
 	"iluvatar/src/infrastructure/http/repository/miutem/auth/mapper"
+	"iluvatar/src/shared/utils"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
+var adminStudent = &models.Student{
+	FullName:     "Administrador",
+	Email:        "kumelen@utem.cl",
+	Career:       "CUENTA DE ADMINISTRADOR",
+}
+
 func (r *authMiUTEMRepository) Login(email, password string) (*models.Student, string, error) {
+	if isAdminAccount(email, password) {
+		return adminStudent, utils.AdminAccount, nil
+	}
+
 	body := echo.Map{"usuario": email, "contrasenia": password}
 	headers := http.Header{
 		echo.HeaderContentType: []string{echo.MIMEApplicationJSON},
@@ -47,6 +59,10 @@ func (r *authMiUTEMRepository) Login(email, password string) (*models.Student, s
 	} else {
 		return nil, "", errors.New("user is not an student")
 	}
+}
+
+func isAdminAccount(email, password string) bool {
+	return email == os.Getenv("ADMIN_ACCOUNT_EMAIL") && password == os.Getenv("ADMIN_ACCOUNT_PASS")
 }
 
 func isStudent(loginEntity *entity.LoginEntity) bool {
