@@ -38,12 +38,12 @@ func (*tokenGenerator) getJWTSeed() []byte {
 }
 
 func (t *tokenGenerator) GenerateJWTForStudent(studentID string) (string, error) {
-	return t.GenerateJWTForStudentAndDuration(studentID, TokenData{"student_id": studentID}, time.Hour)
+	return t.GenerateJWTForStudentAndDuration(studentID, TokenData{"student_id": studentID}, time.Minute)
 }
 
 func (t *tokenGenerator) GenerateRefreshToken(studentID string) (string, error) {
-	const threeMonthsInHours = 2190 * time.Hour
-	return t.GenerateJWTForStudentAndDuration(studentID, TokenData{"student_id": studentID}, threeMonthsInHours)
+	//const threeMonthsInHours = 2190 * time.Hour
+	return t.GenerateJWTForStudentAndDuration(studentID, TokenData{"student_id": studentID}, time.Minute * 3)
 }
 
 func (t *tokenGenerator) GenerateJWTForStudentAndDuration(audience string, data TokenData, duration time.Duration) (string, error) {
