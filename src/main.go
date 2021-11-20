@@ -14,6 +14,7 @@ import (
 	"iluvatar/src/infrastructure/db/postgresql/ainulindale/entity"
 	"iluvatar/src/infrastructure/http/handlers/rest/health"
 	authHandler "iluvatar/src/infrastructure/http/handlers/rest/v1/auth"
+	hooksHandler "iluvatar/src/infrastructure/http/handlers/rest/v1/hooks"
 	authRepository "iluvatar/src/infrastructure/http/repository/miutem/auth"
 	"iluvatar/src/infrastructure/http/repository/miutem/career"
 	"iluvatar/src/shared/utils/jwt"
@@ -48,6 +49,8 @@ func main() {
 	authUseCaseImpl := authUseCase.NewAuthUseCase(authRepositoryImpl, careerRepository, ainulindaleRepository, tokenGenerator)
 	_ = authHandler.NewAuthHandler(e, authUseCaseImpl)
 
+	_ = hooksHandler.NewHooksHandler(e)
+	
 	quit := make(chan os.Signal, 1)
 	go startServer(e, quit)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
