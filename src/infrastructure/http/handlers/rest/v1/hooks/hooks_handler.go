@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
 	"net/http"
@@ -28,10 +29,11 @@ func getJSONRawBody(c echo.Context) map[string]interface{}  {
 	jsonBody := make(map[string]interface{})
 	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
 	if err != nil {
-
 		log.Error("empty json body")
 		return nil
 	}
 
+	encodedJson, _ := json.Marshal(jsonBody)
+	fmt.Println(string(encodedJson))
 	return jsonBody
 }
