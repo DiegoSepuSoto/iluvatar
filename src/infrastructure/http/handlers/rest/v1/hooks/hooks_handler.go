@@ -1,7 +1,9 @@
 package hooks
 
 import (
+	"encoding/json"
 	"github.com/labstack/echo"
+	"github.com/labstack/gommon/log"
 	"net/http"
 )
 
@@ -19,5 +21,17 @@ func NewHooksHandler(e *echo.Echo) *hooksHandler {
 }
 
 func (h *hooksHandler) newPostHookHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, echo.Map{"message-received": c.Request().Body})
+	return c.JSON(http.StatusOK, echo.Map{"message-received": getJSONRawBody(c)})
+}
+
+func getJSONRawBody(c echo.Context) map[string]interface{}  {
+	jsonBody := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
+	if err != nil {
+
+		log.Error("empty json body")
+		return nil
+	}
+
+	return jsonBody
 }
