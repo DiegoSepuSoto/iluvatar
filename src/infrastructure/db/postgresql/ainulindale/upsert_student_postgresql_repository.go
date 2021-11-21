@@ -19,6 +19,7 @@ func (r *ainulindalePostgresqlRepository) UpsertStudent(student *models.Student)
 		ID:     uuid.New().String(),
 		Email:  encryptedEmail,
 		Career: student.Career,
+		DeviceID: student.DeviceID,
 	}
 
 	var queryStudent entity.StudentEntity
@@ -37,6 +38,9 @@ func (r *ainulindalePostgresqlRepository) UpsertStudent(student *models.Student)
 
 		return studentEntity.ID, nil
 	}
+
+	queryStudent.DeviceID = studentEntity.DeviceID
+	db.Save(&queryStudent)
 
 	return queryStudent.ID, nil
 }

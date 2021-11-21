@@ -2,18 +2,22 @@ package hooks
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo"
-	"github.com/labstack/gommon/log"
+	"iluvatar/src/application/usecase"
+	"iluvatar/src/domain/models/requests"
 	"net/http"
 )
 
+const postModel = "post"
+
 const basePath = "/v1/hooks"
 
-type hooksHandler struct {}
+type hooksHandler struct {
+	notificationUseCase usecase.NotificationUseCase
+}
 
-func NewHooksHandler(e *echo.Echo) *hooksHandler {
-	h := &hooksHandler{}
+func NewHooksHandler(e *echo.Echo, notificationUseCase usecase.NotificationUseCase) *hooksHandler {
+	h := &hooksHandler{notificationUseCase: notificationUseCase}
 
 	hooksGroupWithoutAuthentication := e.Group(basePath)
 	hooksGroupWithoutAuthentication.POST("/post", h.newPostHookHandler)
@@ -22,18 +26,34 @@ func NewHooksHandler(e *echo.Echo) *hooksHandler {
 }
 
 func (h *hooksHandler) newPostHookHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, echo.Map{"message-received": getJSONRawBody(c)})
-}
+	var hookRequest *requests.HookRequest
 
-func getJSONRawBody(c echo.Context) map[string]interface{}  {
-	jsonBody := make(map[string]interface{})
-	err := json.NewDecoder(c.Request().Body).Decode(&jsonBody)
-	if err != nil {
-		log.Error("empty json body")
-		return nil
+	if err := c.Bind(&hookRequest); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": err.Error()})
 	}
 
-	encodedJson, _ := json.Marshal(jsonBody)
-	fmt.Println(string(encodedJson))
-	return jsonBody
+	if !isPostModel(hookRequest) {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "the request is not a post model"})
+	}
+
+	marshalledHookEntry, err := json.Marshal(hookRequest.Entry)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": err.Error()})
+	}
+
+	var newPostHookRequest *requests.HookPostModelRequest
+	if errUnmarshal := json.Unmarshal(marshalledHookEntry, &newPostHookRequest); errUnmarshal != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "the request is not a post model"})
+	}
+
+	err = h.notificationUseCase.SendNotificationsToAllUsers(newPostHookRequest)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"message": "the notification were sent successfully"})
+}
+
+func isPostModel(hookRequest *requests.HookRequest) bool {
+	return hookRequest.Model == postModel
 }

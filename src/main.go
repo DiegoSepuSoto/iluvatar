@@ -9,12 +9,14 @@ import (
 	client "github.com/pzentenoe/httpclient-call-go"
 	"gorm.io/gorm"
 	authUseCase "iluvatar/src/application/usecase/auth"
+	notificationUseCase "iluvatar/src/application/usecase/notification"
 	sql "iluvatar/src/infrastructure/db/postgresql"
 	"iluvatar/src/infrastructure/db/postgresql/ainulindale"
 	"iluvatar/src/infrastructure/db/postgresql/ainulindale/entity"
 	"iluvatar/src/infrastructure/http/handlers/rest/health"
 	authHandler "iluvatar/src/infrastructure/http/handlers/rest/v1/auth"
 	hooksHandler "iluvatar/src/infrastructure/http/handlers/rest/v1/hooks"
+	messagingRepository "iluvatar/src/infrastructure/http/repository/firebase/messaging"
 	authRepository "iluvatar/src/infrastructure/http/repository/miutem/auth"
 	"iluvatar/src/infrastructure/http/repository/miutem/career"
 	"iluvatar/src/shared/utils/jwt"
@@ -49,7 +51,10 @@ func main() {
 	authUseCaseImpl := authUseCase.NewAuthUseCase(authRepositoryImpl, careerRepository, ainulindaleRepository, tokenGenerator)
 	_ = authHandler.NewAuthHandler(e, authUseCaseImpl)
 
-	_ = hooksHandler.NewHooksHandler(e)
+	messagingRepositoryHTTPClient := client.NewHTTPClientCall(os.Getenv("CLOUD_MESSAGE_API_HOST"), &http.Client{})
+	messagingRepositoryImpl := messagingRepository.NewMessagingFirebaseRepository(messagingRepositoryHTTPClient)
+	newNotificationUseCaseImpl := notificationUseCase.NewNotificationUseCase(messagingRepositoryImpl, ainulindaleRepository)
+	_ = hooksHandler.NewHooksHandler(e, newNotificationUseCaseImpl)
 	
 	quit := make(chan os.Signal, 1)
 	go startServer(e, quit)

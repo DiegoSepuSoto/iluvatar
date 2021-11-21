@@ -1,8 +1,11 @@
 package usecase
 
-import "iluvatar/src/domain/models"
+import (
+	"iluvatar/src/domain/models"
+	"iluvatar/src/domain/models/requests"
+)
 
 type AuthUseCase interface {
-	Login(email, password string) (*models.Student, error)
+	Login(loginRequest *requests.StudentLoginRequest) (*models.Student, error)
 	RefreshToken(studentID string) (string, error)
 }

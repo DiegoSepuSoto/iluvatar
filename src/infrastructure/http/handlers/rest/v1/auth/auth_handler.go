@@ -57,7 +57,7 @@ func (h *authHandler) login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, echo.Map{"message": err.Error()})
 	}
 
-	student, err := h.authUseCase.Login(loginRequest.Email, loginRequest.Password)
+	student, err := h.authUseCase.Login(loginRequest)
 	if err != nil {
 		if err.Error() == forbiddenUserError {
 			return c.JSON(http.StatusForbidden, echo.Map{"message": err.Error()})
