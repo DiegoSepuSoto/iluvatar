@@ -1,0 +1,113 @@
+definitions:
+  models.Student:
+    properties:
+      career:
+        type: string
+      device_id:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      refresh_token:
+        type: string
+      token:
+        type: string
+    type: object
+info:
+  contact:
+    email: diego.sepulvedas@utem.cl
+    name: Diego Sepúlveda
+  description: En esta documentación se encuentran los detalles de los endpoints presentes
+    en el artefacto API del proyecto Kümelen
+  title: Documentación Artefacto API
+  version: "1.0"
+paths:
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Permite a los estudiantes iniciar sesión con sus credenciales de
+        Pasaporte.UTEM
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Student'
+        "400":
+          description: BadRequest
+          schema:
+            additionalProperties: true
+            type: object
+        "502":
+          description: BadGateway
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Inicio de Sesión
+      tags:
+      - API V1 - Autenticación
+  /v1/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Para reducir la cantidad de veces que un usuario debe iniciar sesión,
+        se diponibiliza un endpoint para actualizar el token de consultas a los diferentes
+        servicios
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Token-Autorización
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "502":
+          description: BadGateway
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Actualización Token
+      tags:
+      - API V1 - Autenticación
+  /v1/auth/validate-token:
+    post:
+      consumes:
+      - application/json
+      description: Valida si el token de autenticación enviado es válido
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Token-Autorización
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Validar Token
+      tags:
+      - API V1 - Autenticación
+swagger: "2.0"

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	client "github.com/pzentenoe/httpclient-call-go"
 	"iluvatar/src/infrastructure/http/repository/miutem/career/entity"
 	"io/ioutil"

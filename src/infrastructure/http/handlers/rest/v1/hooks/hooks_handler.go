@@ -2,7 +2,7 @@ package hooks
 
 import (
 	"encoding/json"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"iluvatar/src/application/usecase"
 	"iluvatar/src/domain/models/requests"
 	"net/http"

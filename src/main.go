@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	client "github.com/pzentenoe/httpclient-call-go"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"gorm.io/gorm"
+	_ "iluvatar/docs"
 	authUseCase "iluvatar/src/application/usecase/auth"
 	notificationUseCase "iluvatar/src/application/usecase/notification"
 	sql "iluvatar/src/infrastructure/db/postgresql"
@@ -29,6 +31,11 @@ import (
 	"time"
 )
 
+// @title Documentación Artefacto API
+// @version 1.0
+// @description En esta documentación se encuentran los detalles de los endpoints presentes en el artefacto API del proyecto Kümelen
+// @contact.name Diego Sepúlveda
+// @contact.email diego.sepulvedas@utem.cl
 func main() {
 	postgresqlConnection := CreatePostgreSQLConnection()
 	dbConnection := postgresqlConnection.GetConnection()
@@ -38,6 +45,8 @@ func main() {
 	e.HideBanner = true
 	e.Use(middleware.CORS())
 	e.Use(middleware.Recover())
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	health.NewHealthHandler(e)
 

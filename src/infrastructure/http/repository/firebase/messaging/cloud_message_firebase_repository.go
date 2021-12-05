@@ -3,7 +3,7 @@ package messaging
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"iluvatar/src/domain/models/requests"
 	"iluvatar/src/infrastructure/http/repository/firebase/messaging/entity"
