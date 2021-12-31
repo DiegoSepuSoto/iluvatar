@@ -51,7 +51,7 @@ func (h *hooksHandler) newPostHookHandler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, echo.Map{"message": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"message": "the notification were sent successfully"})
+	return c.JSON(http.StatusOK, echo.Map{"message": "the notification was sent successfully"})
 }
 
 func isPostModel(hookRequest *requests.HookRequest) bool {
